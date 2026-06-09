@@ -1,0 +1,4 @@
+/* Login page specific overrides — imported by Login.jsx if needed */
+.login-page .auth-box {
+  border-top: 4px solid var(--accent);
+}
