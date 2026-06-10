@@ -11,7 +11,7 @@ import MyNews from './pages/MyNews.jsx'
 
 function App() {
   return (
-    <Router>
+    <Router basename="/news-frontend/">
       <Header />
       <main className="main-content">
         <Routes>
