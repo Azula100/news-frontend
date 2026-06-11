@@ -1,6 +1,20 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import axios from 'axios'
+import { CKEditor } from '@ckeditor/ckeditor5-react'
+import {
+  ClassicEditor,
+  Bold, Italic, Underline, Strikethrough,
+  Heading, FontSize, FontColor, FontBackgroundColor, FontFamily,
+  BlockQuote, Link, List, Alignment,
+  Image, ImageUpload, ImageToolbar, ImageCaption, ImageStyle, ImageResize,
+  Table, TableToolbar, TableCellProperties, TableColumnResize,
+  HorizontalLine, Indent, IndentBlock,
+  Essentials, Paragraph, Autoformat, PasteFromOffice,
+  FindAndReplace, RemoveFormat, SpecialCharacters, SpecialCharactersEssentials,
+  MediaEmbed, PageBreak
+} from 'ckeditor5'
+import 'ckeditor5/ckeditor5.css'
 
 export default function CreateNews() {
   const navigate = useNavigate()
