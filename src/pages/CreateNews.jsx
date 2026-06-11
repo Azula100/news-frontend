@@ -8,6 +8,7 @@ import {
   Heading, FontSize, FontColor, FontBackgroundColor, FontFamily,
   BlockQuote, Link, List, Alignment,
   Image, ImageUpload, ImageToolbar, ImageCaption, ImageStyle, ImageResize,
+  Base64UploadAdapter,
   Table, TableToolbar, TableCellProperties, TableColumnResize,
   HorizontalLine, Indent, IndentBlock,
   Essentials, Paragraph, Autoformat, PasteFromOffice,
@@ -18,29 +19,30 @@ import 'ckeditor5/ckeditor5.css'
 
 const IMGBB_API_KEY = '6e88139725cce9de8e602e969dbca238'
 
-class ImgbbAdapter {
-  constructor(loader) { this.loader = loader }
-  upload() {
-    return this.loader.file.then(file => {
-      const data = new FormData()
-      data.append('image', file)
-      return fetch(`https://api.imgbb.com/1/upload?key=${IMGBB_API_KEY}`, {
-        method: 'POST',
-        body: data
-      })
-      .then(res => res.json())
-      .then(res => {
-        if (res.success) return { default: res.data.url }
-        throw new Error('Зураг upload хийхэд алдаа гарлаа')
-      })
-    })
-  }
-  abort() {}
-}
+const uploadBase64Images = async (content) => {
+  const parser = new DOMParser()
+  const doc = parser.parseFromString(content, 'text/html')
+  const images = doc.querySelectorAll('img[src^="data:"]')
 
-function ImgbbAdapterPlugin(editor) {
-  editor.plugins.get('FileRepository').createUploadAdapter = loader =>
-    new ImgbbAdapter(loader)
+  for (const img of images) {
+    try {
+      const res = await fetch(img.src)
+      const blob = await res.blob()
+      const formData = new FormData()
+      formData.append('image', blob)
+      const uploadRes = await fetch(
+        `https://api.imgbb.com/1/upload?key=${IMGBB_API_KEY}`,
+        { method: 'POST', body: formData }
+      )
+      const data = await uploadRes.json()
+      if (data.success) {
+        img.src = data.data.url
+      }
+    } catch (err) {
+      console.error('Зураг upload хийхэд алдаа:', err)
+    }
+  }
+  return doc.body.innerHTML
 }
 
 export default function CreateNews() {
@@ -86,6 +88,7 @@ export default function CreateNews() {
     if (!form.category) e.category = 'Категори сонгоно уу'
     return e
   }
+
   const handleSubmit = async e => {
     e.preventDefault()
     setApiError('')
@@ -94,11 +97,16 @@ export default function CreateNews() {
     setLoading(true)
     try {
       const token = localStorage.getItem('token')
+
+      // Base64 зургуудыг imgbb-д upload хийж URL-ээр солих
+      const processedContent = await uploadBase64Images(form.content)
+
       const formData = new FormData()
       formData.append('title',    form.title)
-      formData.append('content',  form.content)
+      formData.append('content',  processedContent)
       formData.append('category', form.category)
       if (image) formData.append('image', image)
+
       const res = await axios.post('/api/news', formData, {
         headers: {
           Authorization: `Bearer ${token}`,
@@ -186,7 +194,6 @@ export default function CreateNews() {
           )}
         </div>
 
-        {/* ✅ CKEditor — ImgBB adapter */}
         <div className="form-group">
           <label className="form-label">Агуулга *</label>
           <div className={errors.content ? 'ck-error' : ''}>
@@ -194,13 +201,13 @@ export default function CreateNews() {
               editor={ClassicEditor}
               config={{
                 licenseKey: 'GPL',
-                extraPlugins: [ImgbbAdapterPlugin],
                 plugins: [
                   Essentials, Paragraph, Autoformat, PasteFromOffice,
                   Bold, Italic, Underline, Strikethrough,
                   Heading, FontSize, FontColor, FontBackgroundColor, FontFamily,
                   BlockQuote, Link, List, Alignment,
                   Image, ImageUpload, ImageToolbar, ImageCaption, ImageStyle, ImageResize,
+                  Base64UploadAdapter,
                   Table, TableToolbar, TableCellProperties, TableColumnResize,
                   HorizontalLine, Indent, IndentBlock,
                   FindAndReplace, RemoveFormat,
@@ -251,7 +258,7 @@ export default function CreateNews() {
             disabled={loading}
             style={{ flex: 1, padding: 14, fontSize: 16 }}
           >
-            {loading ? '📤 Нийтэлж байна...' : '🚀 Нийтлэх'}
+            {loading ? '📤 Зураг upload хийж нийтэлж байна...' : '🚀 Нийтлэх'}
           </button>
           <button
             type="button"
