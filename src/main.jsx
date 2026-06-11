@@ -4,7 +4,7 @@ import App from './App.jsx'
 import './styles/style.css'
 import axios from 'axios'
 
-axios.defaults.baseURL = 'https://news-backend.onrender.com'
+axios.defaults.baseURL = 'https://news-backend-mcuk.onrender.com'
 axios.defaults.timeout = 60000 
 
 ReactDOM.createRoot(document.getElementById('root')).render(
