@@ -161,16 +161,32 @@ export default function CreateNews() {
        
         <div className="form-group">
           <label className="form-label">Агуулга *</label>
-          <textarea
-            name="content"
-            className={`form-input ${errors.content ? 'error' : ''}`}
-            placeholder="Мэдээний агуулга энд бичнэ..."
-            rows={14}
-            style={{ resize: 'vertical', lineHeight: 1.8 }}
-            value={form.content}
-            onChange={handleChange}
+          <CKEditor
+            editor={ClassicEditor}
+            config={{
+              plugins: [
+                Essentials, Paragraph, Autoformat, PasteFromOffice,
+                Bold, Italic, Underline, Strikethrough,
+                Heading, FontSize, FontColor, FontFamily,
+                BlockQuote, Link, List, Alignment,
+                Image, ImageUpload, ImageToolbar, ImageCaption, ImageStyle, ImageResize,
+                Table, TableToolbar, MediaEmbed, HorizontalLine,
+                Indent, IndentBlock, RemoveFormat
+              ],
+              toolbar: [
+                'heading', '|', 'bold', 'italic', 'underline', '|',
+                'fontSize', 'fontColor', '|', 'alignment', '|',
+                'bulletedList', 'numberedList', '|',
+                'link', 'insertTable', 'blockQuote', 'mediaEmbed', '|',
+                'undo', 'redo'
+              ],
+              placeholder: 'Мэдээний агуулга энд бичнэ...'
+            }}
+            data={editForm.content}
+            onChange={(event, editor) => {
+              setEditForm({ ...editForm, content: editor.getData() })
+            }}
           />
-          {errors.content && <p className="form-error">{errors.content}</p>}
         </div>
 
         <div style={{ display: 'flex', gap: 12, marginTop: 8 }}>
