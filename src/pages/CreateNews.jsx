@@ -166,6 +166,7 @@ export default function CreateNews() {
             <CKEditor
               editor={ClassicEditor}
               config={{
+                licenseKey: 'GPL',
                 plugins: [
                   Essentials, Paragraph, Autoformat, PasteFromOffice,
                   Bold, Italic, Underline, Strikethrough,
