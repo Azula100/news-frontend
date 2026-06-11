@@ -540,6 +540,53 @@ button { cursor: pointer; font-family: inherit; }
 .ck-content blockquote {
   margin-bottom: 1em;
 }
+
+/* detail-content дотор CKEditor HTML зөв харагдах */
+.detail-content.ck-content h1,
+.detail-content.ck-content h2,
+.detail-content.ck-content h3 {
+  font-family: var(--font-display);
+  color: var(--ink);
+}
+
+.detail-content.ck-content p {
+  margin-bottom: 20px;
+  font-size: 18px;
+  line-height: 1.85;
+  color: var(--ink-light);
+}
+
+.detail-content.ck-content ul,
+.detail-content.ck-content ol {
+  padding-left: 1.5em;
+  margin-bottom: 1em;
+}
+
+.detail-content.ck-content blockquote {
+  border-left: 3px solid var(--accent);
+  padding-left: 1em;
+  color: var(--ink-faint);
+  font-style: italic;
+  margin: 1em 0;
+}
+
+.detail-content.ck-content table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 1em;
+}
+
+.detail-content.ck-content td,
+.detail-content.ck-content th {
+  border: 1px solid var(--border);
+  padding: 8px 12px;
+}
+
+.detail-content.ck-content img {
+  max-width: 100%;
+  border-radius: 4px;
+  margin: 1em 0;
+}
 @keyframes spin { to { transform: rotate(360deg); } }
 
 /* ===== Footer ===== */
