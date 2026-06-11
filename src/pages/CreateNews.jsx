@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import axios from 'axios'
 import { CKEditor } from '@ckeditor/ckeditor5-react'
 import {
+  Base64UploadAdapter,
   ClassicEditor,
   Bold, Italic, Underline, Strikethrough,
   Heading, FontSize, FontColor, FontBackgroundColor, FontFamily,
@@ -177,7 +178,7 @@ export default function CreateNews() {
                   HorizontalLine, Indent, IndentBlock,
                   FindAndReplace, RemoveFormat,
                   SpecialCharacters, SpecialCharactersEssentials,
-                  MediaEmbed, PageBreak
+                  MediaEmbed, PageBreak, Base64UploadAdapter
                 ],
                 toolbar: [
                   'heading', '|',
