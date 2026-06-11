@@ -14,6 +14,7 @@ import {
   FindAndReplace, RemoveFormat, SpecialCharacters, SpecialCharactersEssentials,
   MediaEmbed, PageBreak
 } from 'ckeditor5'
+import 'ckeditor5/ckeditor5.css'
 
 export default function CreateNews() {
   const navigate = useNavigate()
@@ -53,8 +54,8 @@ export default function CreateNews() {
   }
   const validate = () => {
     const e = {}
-    if (!form.title.trim()) e.title    = 'Гарчиг оруулна уу'
-    if (!form.content.trim()) e.content  = 'Агуулга оруулна уу'
+    if (!form.title.trim()) e.title = 'Гарчиг оруулна уу'
+    if (!form.content.trim()) e.content = 'Агуулга оруулна уу'
     if (!form.category) e.category = 'Категори сонгоно уу'
     return e
   }
@@ -94,9 +95,11 @@ export default function CreateNews() {
           ✍️ Шинэ мэдээ нэмэх
         </h1>
       </div>
+
       {apiError && <div className="alert alert-error">{apiError}</div>}
+
       <form onSubmit={handleSubmit}>
-    
+
         <div className="form-group">
           <label className="form-label">Гарчиг *</label>
           <input
@@ -109,7 +112,6 @@ export default function CreateNews() {
           {errors.title && <p className="form-error">{errors.title}</p>}
         </div>
 
-        
         <div className="form-group">
           <label className="form-label">Категори *</label>
           <select
@@ -126,7 +128,6 @@ export default function CreateNews() {
           {errors.category && <p className="form-error">{errors.category}</p>}
         </div>
 
-        
         <div className="form-group">
           <label className="form-label">Зураг (заавал биш)</label>
           <input
@@ -158,35 +159,60 @@ export default function CreateNews() {
           )}
         </div>
 
-       
+        {/* ✅ CKEditor */}
         <div className="form-group">
           <label className="form-label">Агуулга *</label>
-          <CKEditor
-            editor={ClassicEditor}
-            config={{
-              plugins: [
-                Essentials, Paragraph, Autoformat, PasteFromOffice,
-                Bold, Italic, Underline, Strikethrough,
-                Heading, FontSize, FontColor, FontFamily,
-                BlockQuote, Link, List, Alignment,
-                Image, ImageUpload, ImageToolbar, ImageCaption, ImageStyle, ImageResize,
-                Table, TableToolbar, MediaEmbed, HorizontalLine,
-                Indent, IndentBlock, RemoveFormat
-              ],
-              toolbar: [
-                'heading', '|', 'bold', 'italic', 'underline', '|',
-                'fontSize', 'fontColor', '|', 'alignment', '|',
-                'bulletedList', 'numberedList', '|',
-                'link', 'insertTable', 'blockQuote', 'mediaEmbed', '|',
-                'undo', 'redo'
-              ],
-              placeholder: 'Мэдээний агуулга энд бичнэ...'
-            }}
-            data={editForm.content}
-            onChange={(event, editor) => {
-              setEditForm({ ...editForm, content: editor.getData() })
-            }}
-          />
+          <div className={errors.content ? 'ck-error' : ''}>
+            <CKEditor
+              editor={ClassicEditor}
+              config={{
+                plugins: [
+                  Essentials, Paragraph, Autoformat, PasteFromOffice,
+                  Bold, Italic, Underline, Strikethrough,
+                  Heading, FontSize, FontColor, FontBackgroundColor, FontFamily,
+                  BlockQuote, Link, List, Alignment,
+                  Image, ImageUpload, ImageToolbar, ImageCaption, ImageStyle, ImageResize,
+                  Table, TableToolbar, TableCellProperties, TableColumnResize,
+                  HorizontalLine, Indent, IndentBlock,
+                  FindAndReplace, RemoveFormat,
+                  SpecialCharacters, SpecialCharactersEssentials,
+                  MediaEmbed, PageBreak
+                ],
+                toolbar: [
+                  'heading', '|',
+                  'bold', 'italic', 'underline', 'strikethrough', '|',
+                  'fontSize', 'fontFamily', 'fontColor', 'fontBackgroundColor', '|',
+                  'alignment', '|',
+                  'bulletedList', 'numberedList', '|',
+                  'outdent', 'indent', '|',
+                  'link', 'insertImage', 'insertTable', 'blockQuote',
+                  'mediaEmbed', 'horizontalLine', 'pageBreak', '|',
+                  'findAndReplace', 'removeFormat', '|',
+                  'undo', 'redo'
+                ],
+                image: {
+                  toolbar: [
+                    'imageStyle:inline', 'imageStyle:block', 'imageStyle:side', '|',
+                    'toggleImageCaption', 'imageTextAlternative'
+                  ]
+                },
+                table: {
+                  contentToolbar: [
+                    'tableColumn', 'tableRow', 'mergeTableCells',
+                    'tableProperties', 'tableCellProperties'
+                  ]
+                },
+                placeholder: 'Мэдээний агуулга энд бичнэ...'
+              }}
+              data={form.content}
+              onChange={(event, editor) => {
+                const data = editor.getData()
+                setForm(prev => ({ ...prev, content: data }))
+                setErrors(prev => ({ ...prev, content: '' }))
+              }}
+            />
+          </div>
+          {errors.content && <p className="form-error">{errors.content}</p>}
         </div>
 
         <div style={{ display: 'flex', gap: 12, marginTop: 8 }}>
