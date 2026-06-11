@@ -8,6 +8,7 @@ import {
   Heading, FontSize, FontColor, FontBackgroundColor, FontFamily,
   BlockQuote, Link, List, Alignment,
   Image, ImageUpload, ImageToolbar, ImageCaption, ImageStyle, ImageResize,
+  Base64UploadAdapter,
   Table, TableToolbar, TableCellProperties, TableColumnResize,
   HorizontalLine, Indent, IndentBlock,
   Essentials, Paragraph, Autoformat, PasteFromOffice,
@@ -18,29 +19,30 @@ import 'ckeditor5/ckeditor5.css'
 
 const IMGBB_API_KEY = '6e88139725cce9de8e602e969dbca238'
 
-class ImgbbAdapter {
-  constructor(loader) { this.loader = loader }
-  upload() {
-    return this.loader.file.then(file => {
-      const data = new FormData()
-      data.append('image', file)
-      return fetch(`https://api.imgbb.com/1/upload?key=${IMGBB_API_KEY}`, {
-        method: 'POST',
-        body: data
-      })
-      .then(res => res.json())
-      .then(res => {
-        if (res.success) return { default: res.data.url }
-        throw new Error('Зураг upload хийхэд алдаа гарлаа')
-      })
-    })
-  }
-  abort() {}
-}
+const uploadBase64Images = async (content) => {
+  const parser = new DOMParser()
+  const doc = parser.parseFromString(content, 'text/html')
+  const images = doc.querySelectorAll('img[src^="data:"]')
 
-function ImgbbAdapterPlugin(editor) {
-  editor.plugins.get('FileRepository').createUploadAdapter = loader =>
-    new ImgbbAdapter(loader)
+  for (const img of images) {
+    try {
+      const res = await fetch(img.src)
+      const blob = await res.blob()
+      const formData = new FormData()
+      formData.append('image', blob)
+      const uploadRes = await fetch(
+        `https://api.imgbb.com/1/upload?key=${IMGBB_API_KEY}`,
+        { method: 'POST', body: formData }
+      )
+      const data = await uploadRes.json()
+      if (data.success) {
+        img.src = data.data.url
+      }
+    } catch (err) {
+      console.error('Зураг upload хийхэд алдаа:', err)
+    }
+  }
+  return doc.body.innerHTML
 }
 
 export default function NewsDetail() {
@@ -101,11 +103,15 @@ export default function NewsDetail() {
     setEditError('')
     try {
       const token = localStorage.getItem('token')
+
+      // Base64 зургуудыг imgbb-д upload хийж URL-ээр солих
+      const processedContent = await uploadBase64Images(editForm.content)
+
       let res
       if (editImage) {
         const formData = new FormData()
         formData.append('title',    editForm.title)
-        formData.append('content',  editForm.content)
+        formData.append('content',  processedContent)
         formData.append('category', editCategory)
         formData.append('image',    editImage)
         res = await axios.put(`/api/news/${id}`, formData, {
@@ -113,7 +119,7 @@ export default function NewsDetail() {
         })
       } else {
         res = await axios.put(`/api/news/${id}`,
-          { title: editForm.title, content: editForm.content, category: editCategory },
+          { title: editForm.title, content: processedContent, category: editCategory },
           { headers: { Authorization: `Bearer ${token}` } }
         )
       }
@@ -203,20 +209,19 @@ export default function NewsDetail() {
         </label>
       </div>
 
-      {/* ✅ CKEditor — ImgBB adapter */}
       <div className="form-group">
         <label className="form-label">Агуулга</label>
         <CKEditor
           editor={ClassicEditor}
           config={{
             licenseKey: 'GPL',
-            extraPlugins: [ImgbbAdapterPlugin],
             plugins: [
               Essentials, Paragraph, Autoformat, PasteFromOffice,
               Bold, Italic, Underline, Strikethrough,
               Heading, FontSize, FontColor, FontBackgroundColor, FontFamily,
               BlockQuote, Link, List, Alignment,
               Image, ImageUpload, ImageToolbar, ImageCaption, ImageStyle, ImageResize,
+              Base64UploadAdapter,
               Table, TableToolbar, TableCellProperties, TableColumnResize,
               HorizontalLine, Indent, IndentBlock,
               FindAndReplace, RemoveFormat,
@@ -259,7 +264,7 @@ export default function NewsDetail() {
       <div style={{ display:'flex', gap:12 }}>
         <button className="btn btn-solid" onClick={handleSave} disabled={saving}
           style={{ flex:1, padding:13, fontSize:15 }}>
-          {saving ? '💾 Хадгалж байна...' : '💾 Хадгалах'}
+          {saving ? '📤 Зураг upload хийж хадгалж байна...' : '💾 Хадгалах'}
         </button>
         <button className="btn btn-outline" onClick={() => { setEditMode(false); setEditError('') }}
           style={{ padding:'13px 28px' }}>Болих</button>
@@ -300,7 +305,6 @@ export default function NewsDetail() {
           : null
       }
 
-      {/* ✅ CKEditor HTML агуулга харуулах */}
       <div
         className="detail-content ck-content"
         dangerouslySetInnerHTML={{ __html: content }}
