@@ -149,7 +149,7 @@ export default function NewsDetail() {
         </select>
       </div>
 
-      <div className="form-group">
+      {/* <div className="form-group">
         <label className="form-label">Зураг</label>
         {editPreview && (
           <div style={{ marginBottom:12, position:'relative' }}>
@@ -175,7 +175,7 @@ export default function NewsDetail() {
         }}>
           📷 {editImage ? editImage.name : 'Шинэ зураг сонгох (jpg, png, webp)'}
         </label>
-      </div>
+      </div> */}
 
       {/* ✅ CKEditor — засах горим */}
       <div className="form-group">
