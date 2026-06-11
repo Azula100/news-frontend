@@ -129,7 +129,7 @@ export default function CreateNews() {
           {errors.category && <p className="form-error">{errors.category}</p>}
         </div>
 
-        <div className="form-group">
+        {/* <div className="form-group">
           <label className="form-label">Зураг (заавал биш)</label>
           <input
             type="file"
@@ -158,7 +158,7 @@ export default function CreateNews() {
                 }}>✕</button>
             </div>
           )}
-        </div>
+        </div> */}
 
         {/* ✅ CKEditor */}
         <div className="form-group">
