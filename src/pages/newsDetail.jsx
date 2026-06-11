@@ -182,6 +182,7 @@ export default function NewsDetail() {
         <CKEditor
           editor={ClassicEditor}
           config={{
+            licenseKey: 'GPL',
             plugins: [
               Essentials, Paragraph, Autoformat, PasteFromOffice,
               Bold, Italic, Underline, Strikethrough,
