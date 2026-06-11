@@ -14,7 +14,6 @@ import {
   FindAndReplace, RemoveFormat, SpecialCharacters, SpecialCharactersEssentials,
   MediaEmbed, PageBreak
 } from 'ckeditor5'
-import 'ckeditor5/ckeditor5.css'
 
 export default function CreateNews() {
   const navigate = useNavigate()
