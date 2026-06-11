@@ -512,6 +512,34 @@ button { cursor: pointer; font-family: inherit; }
   animation: spin 0.8s linear infinite;
 }
 
+/* CKEditor container */
+.ck-editor__editable_inline {
+  min-height: 300px;
+  font-family: "Times New Roman", Times, serif;
+  line-height: 1.6;
+}
+
+/* Алдаатай үед улаан border */
+.ck-error .ck-editor__editable {
+  border-color: #e74c3c !important;
+}
+
+/* Content styles */
+.ck-content h1 { font-size: 2.3em; }
+.ck-content h2 { font-size: 1.84em; }
+.ck-content h3 { font-size: 1.48em; }
+.ck-content h1,
+.ck-content h2,
+.ck-content h3 {
+  padding-top: 0.8em;
+  margin-bottom: 0.4em;
+}
+.ck-content p,
+.ck-content ul,
+.ck-content ol,
+.ck-content blockquote {
+  margin-bottom: 1em;
+}
 @keyframes spin { to { transform: rotate(360deg); } }
 
 /* ===== Footer ===== */
