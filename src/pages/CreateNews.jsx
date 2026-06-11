@@ -3,7 +3,6 @@ import { useNavigate } from 'react-router-dom'
 import axios from 'axios'
 import { CKEditor } from '@ckeditor/ckeditor5-react'
 import {
-  Base64UploadAdapter,
   ClassicEditor,
   Bold, Italic, Underline, Strikethrough,
   Heading, FontSize, FontColor, FontBackgroundColor, FontFamily,
@@ -16,6 +15,33 @@ import {
   MediaEmbed, PageBreak
 } from 'ckeditor5'
 import 'ckeditor5/ckeditor5.css'
+
+const IMGBB_API_KEY = '6e88139725cce9de8e602e969dbca238'
+
+class ImgbbAdapter {
+  constructor(loader) { this.loader = loader }
+  upload() {
+    return this.loader.file.then(file => {
+      const data = new FormData()
+      data.append('image', file)
+      return fetch(`https://api.imgbb.com/1/upload?key=${IMGBB_API_KEY}`, {
+        method: 'POST',
+        body: data
+      })
+      .then(res => res.json())
+      .then(res => {
+        if (res.success) return { default: res.data.url }
+        throw new Error('Зураг upload хийхэд алдаа гарлаа')
+      })
+    })
+  }
+  abort() {}
+}
+
+function ImgbbAdapterPlugin(editor) {
+  editor.plugins.get('FileRepository').createUploadAdapter = loader =>
+    new ImgbbAdapter(loader)
+}
 
 export default function CreateNews() {
   const navigate = useNavigate()
@@ -129,8 +155,8 @@ export default function CreateNews() {
           {errors.category && <p className="form-error">{errors.category}</p>}
         </div>
 
-        {/* <div className="form-group">
-          <label className="form-label">Зураг (заавал биш)</label>
+        <div className="form-group">
+          <label className="form-label">Нүүр зураг (заавал биш)</label>
           <input
             type="file"
             accept="image/jpeg,image/jpg,image/png,image/webp"
@@ -158,9 +184,9 @@ export default function CreateNews() {
                 }}>✕</button>
             </div>
           )}
-        </div> */}
+        </div>
 
-        {/* ✅ CKEditor */}
+        {/* ✅ CKEditor — ImgBB adapter */}
         <div className="form-group">
           <label className="form-label">Агуулга *</label>
           <div className={errors.content ? 'ck-error' : ''}>
@@ -168,6 +194,7 @@ export default function CreateNews() {
               editor={ClassicEditor}
               config={{
                 licenseKey: 'GPL',
+                extraPlugins: [ImgbbAdapterPlugin],
                 plugins: [
                   Essentials, Paragraph, Autoformat, PasteFromOffice,
                   Bold, Italic, Underline, Strikethrough,
@@ -178,7 +205,7 @@ export default function CreateNews() {
                   HorizontalLine, Indent, IndentBlock,
                   FindAndReplace, RemoveFormat,
                   SpecialCharacters, SpecialCharactersEssentials,
-                  MediaEmbed, PageBreak, Base64UploadAdapter
+                  MediaEmbed, PageBreak
                 ],
                 toolbar: [
                   'heading', '|',
