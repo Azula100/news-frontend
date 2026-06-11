@@ -1,6 +1,20 @@
 import { useState, useEffect, useRef } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import axios from 'axios'
+import { CKEditor } from '@ckeditor/ckeditor5-react'
+import {
+  ClassicEditor,
+  Bold, Italic, Underline, Strikethrough,
+  Heading, FontSize, FontColor, FontBackgroundColor, FontFamily,
+  BlockQuote, Link, List, Alignment,
+  Image, ImageUpload, ImageToolbar, ImageCaption, ImageStyle, ImageResize,
+  Table, TableToolbar, TableCellProperties, TableColumnResize,
+  HorizontalLine, Indent, IndentBlock,
+  Essentials, Paragraph, Autoformat, PasteFromOffice,
+  FindAndReplace, RemoveFormat, SpecialCharacters, SpecialCharactersEssentials,
+  MediaEmbed, PageBreak
+} from 'ckeditor5'
+import 'ckeditor5/ckeditor5.css'
 
 export default function NewsDetail() {
   const { id } = useParams()
@@ -62,7 +76,6 @@ export default function NewsDetail() {
       const token = localStorage.getItem('token')
       let res
       if (editImage) {
-        // ✅ Зураг байвал FormData
         const formData = new FormData()
         formData.append('title',    editForm.title)
         formData.append('content',  editForm.content)
@@ -72,7 +85,6 @@ export default function NewsDetail() {
           headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'multipart/form-data' }
         })
       } else {
-        // Зураг байхгүй бол JSON
         res = await axios.put(`/api/news/${id}`,
           { title: editForm.title, content: editForm.content, category: editCategory },
           { headers: { Authorization: `Bearer ${token}` } }
@@ -136,7 +148,6 @@ export default function NewsDetail() {
         </select>
       </div>
 
-      {/* ✅ Зураг upload */}
       <div className="form-group">
         <label className="form-label">Зураг</label>
         {editPreview && (
@@ -165,10 +176,55 @@ export default function NewsDetail() {
         </label>
       </div>
 
+      {/* ✅ CKEditor — засах горим */}
       <div className="form-group">
         <label className="form-label">Агуулга</label>
-        <textarea className="form-input" rows={12} style={{ resize:'vertical', lineHeight:1.7 }}
-          value={editForm.content} onChange={e => setEditForm({ ...editForm, content: e.target.value })} />
+        <CKEditor
+          editor={ClassicEditor}
+          config={{
+            plugins: [
+              Essentials, Paragraph, Autoformat, PasteFromOffice,
+              Bold, Italic, Underline, Strikethrough,
+              Heading, FontSize, FontColor, FontBackgroundColor, FontFamily,
+              BlockQuote, Link, List, Alignment,
+              Image, ImageUpload, ImageToolbar, ImageCaption, ImageStyle, ImageResize,
+              Table, TableToolbar, TableCellProperties, TableColumnResize,
+              HorizontalLine, Indent, IndentBlock,
+              FindAndReplace, RemoveFormat,
+              SpecialCharacters, SpecialCharactersEssentials,
+              MediaEmbed, PageBreak
+            ],
+            toolbar: [
+              'heading', '|',
+              'bold', 'italic', 'underline', 'strikethrough', '|',
+              'fontSize', 'fontFamily', 'fontColor', 'fontBackgroundColor', '|',
+              'alignment', '|',
+              'bulletedList', 'numberedList', '|',
+              'outdent', 'indent', '|',
+              'link', 'insertImage', 'insertTable', 'blockQuote',
+              'mediaEmbed', 'horizontalLine', 'pageBreak', '|',
+              'findAndReplace', 'removeFormat', '|',
+              'undo', 'redo'
+            ],
+            image: {
+              toolbar: [
+                'imageStyle:inline', 'imageStyle:block', 'imageStyle:side', '|',
+                'toggleImageCaption', 'imageTextAlternative'
+              ]
+            },
+            table: {
+              contentToolbar: [
+                'tableColumn', 'tableRow', 'mergeTableCells',
+                'tableProperties', 'tableCellProperties'
+              ]
+            },
+            placeholder: 'Мэдээний агуулга энд бичнэ...'
+          }}
+          data={editForm.content}
+          onChange={(event, editor) => {
+            setEditForm(prev => ({ ...prev, content: editor.getData() }))
+          }}
+        />
       </div>
 
       <div style={{ display:'flex', gap:12 }}>
@@ -208,7 +264,6 @@ export default function NewsDetail() {
         </div>
       </div>
 
-      {/* ✅ Мэдээний зураг — үгүй бол категорийн зураг */}
       {image && image !== 'no-photo.jpg'
         ? <img src={image} alt={title} className="detail-img" />
         : category?.photo && category.photo !== 'no-photo.jpg'
@@ -216,11 +271,11 @@ export default function NewsDetail() {
           : null
       }
 
-      <div className="detail-content">
-        {content && content.split('\n').map((para, i) =>
-          para.trim() ? <p key={i}>{para}</p> : null
-        )}
-      </div>
+      {/* ✅ CKEditor HTML агуулга харуулах */}
+      <div
+        className="detail-content ck-content"
+        dangerouslySetInnerHTML={{ __html: content }}
+      />
 
       {related.length > 0 && (
         <div style={{ marginTop:60, paddingTop:32, borderTop:'3px double var(--border)' }}>
@@ -233,7 +288,6 @@ export default function NewsDetail() {
                 onMouseEnter={e => e.currentTarget.style.boxShadow='var(--shadow)'}
                 onMouseLeave={e => e.currentTarget.style.boxShadow='none'}
               >
-                {/* ✅ Мэдээний зураг → үгүй бол категорийн зураг → үгүй бол placeholder */}
                 {item.image && item.image !== 'no-photo.jpg'
                   ? <img src={item.image} alt={item.title} style={{ width:'100%', height:120, objectFit:'cover' }} />
                   : item.category?.photo && item.category.photo !== 'no-photo.jpg'
